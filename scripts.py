@@ -12,6 +12,15 @@ def get_schoolkid(full_name):
     return None
 
 
+def get_lesson(subject):
+    try:
+        lesson = Lesson.objects.get(year_of_study=6, group_letter='А', subject__title = subject)
+        return lesson
+    except Lesson.DoesNotExist:
+        print('Такой предмет не существует')
+    return None
+
+
 def fix_marks(full_name):
     schoolkid = get_schoolkid(full_name)
     if not schoolkid:
@@ -29,12 +38,15 @@ def remove_chastisements(full_name):
     chastisements.delete()
 
 
-def create_commendation(full_name, lesson):
+def create_commendation(full_name, subject):
     schoolkid = get_schoolkid(full_name)
     if not schoolkid:
+        return None
+
+    lesson = get_lesson(subject)
+    if not lesson:
         return None
 
     lesson = Lesson.objects.filter(year_of_study=6, group_letter='А', subject__title='Математика').first()
 
     Commendation.objects.create(text='Хвалю!', created=lesson.date, schoolkid=schoolkid, subject=lesson.subject, teacher=lesson.teacher)
-
