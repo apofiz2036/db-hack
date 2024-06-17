@@ -1,7 +1,7 @@
 from datacenter.models import Schoolkid, Mark, Chastisement, Lesson, Commendation
+import random
 
-
-commendation_text = 'Хвалю!'
+commendation_text = ['Хвалю!', 'Молодец!', 'Старался']
 
 
 def get_schoolkid(full_name):
@@ -17,7 +17,7 @@ def get_schoolkid(full_name):
 
 def get_lesson(schoolkid, subject):
     try:
-        lessons = Lesson.objects.filter(
+        lessons = Lesson.objects.get(
             year_of_study=schoolkid.year_of_study,
             group_letter=schoolkid.group_letter,
             subject__title=subject
@@ -53,7 +53,7 @@ def create_commendation(full_name, subject):
         return None
 
     Commendation.objects.create(
-        text=commendation_text,
+        text=random.choice(commendation_text),
         created=lesson.date,
         schoolkid=schoolkid,
         subject=lesson.subject,
