@@ -1,4 +1,7 @@
-from datacenter.models import Schoolkid, Mark, Chastisement, Lesson
+from datacenter.models import Schoolkid, Mark, Chastisement, Lesson, Commendation
+
+
+commendation_text = 'Хвалю!'
 
 
 def get_schoolkid(full_name):
@@ -12,10 +15,14 @@ def get_schoolkid(full_name):
     return None
 
 
-def get_lesson(subject):
+def get_lesson(schoolkid, subject):
     try:
-        lesson = Lesson.objects.get(year_of_study=6, group_letter='А', subject__title = subject)
-        return lesson
+        lessons = Lesson.objects.filter(
+            year_of_study=schoolkid.year_of_study,
+            group_letter=schoolkid.group_letter,
+            subject__title=subject
+        ).order_by('-date')
+        return lessons.first()
     except Lesson.DoesNotExist:
         print('Такой предмет не существует')
     return None
@@ -25,9 +32,7 @@ def fix_marks(full_name):
     schoolkid = get_schoolkid(full_name)
     if not schoolkid:
         return None
-    for mark in Mark.objects.filter(schoolkid=schoolkid, points__in=[2, 3]):
-        mark.points = 5
-        mark.save()
+    Mark.objects.filter(schoolkid=schoolkid, points__in=[2, 3]).update(points=5)
 
 
 def remove_chastisements(full_name):
@@ -43,10 +48,14 @@ def create_commendation(full_name, subject):
     if not schoolkid:
         return None
 
-    lesson = get_lesson(subject)
+    lesson = get_lesson(schoolkid, subject)
     if not lesson:
         return None
 
-    lesson = Lesson.objects.filter(year_of_study=6, group_letter='А', subject__title='Математика').first()
-
-    Commendation.objects.create(text='Хвалю!', created=lesson.date, schoolkid=schoolkid, subject=lesson.subject, teacher=lesson.teacher)
+    Commendation.objects.create(
+        text=commendation_text,
+        created=lesson.date,
+        schoolkid=schoolkid,
+        subject=lesson.subject,
+        teacher=lesson.teacher
+    )
