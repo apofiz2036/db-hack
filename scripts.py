@@ -1,7 +1,8 @@
-from datacenter.models import Schoolkid, Mark, Chastisement, Lesson, Commendation
 import random
 
-commendation_text = ['Хвалю!', 'Молодец!', 'Старался']
+from datacenter.models import Schoolkid, Mark, Chastisement, Lesson, Commendation
+
+commendations = ['Хвалю!', 'Молодец!', 'Старался']
 
 
 def get_schoolkid(full_name):
@@ -16,16 +17,12 @@ def get_schoolkid(full_name):
 
 
 def get_lesson(schoolkid, subject):
-    try:
-        lessons = Lesson.objects.get(
-            year_of_study=schoolkid.year_of_study,
-            group_letter=schoolkid.group_letter,
-            subject__title=subject
-        ).order_by('-date')
-        return lessons.first()
-    except Lesson.DoesNotExist:
-        print('Такой предмет не существует')
-    return None
+    lessons = Lesson.objects.filter(
+        year_of_study=schoolkid.year_of_study,
+        group_letter=schoolkid.group_letter,
+        subject__title=subject
+    ).order_by('-date')
+    return lessons.first()
 
 
 def fix_marks(full_name):
@@ -53,7 +50,7 @@ def create_commendation(full_name, subject):
         return None
 
     Commendation.objects.create(
-        text=random.choice(commendation_text),
+        text=random.choice(commendations),
         created=lesson.date,
         schoolkid=schoolkid,
         subject=lesson.subject,
